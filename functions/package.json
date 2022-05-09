@@ -19,8 +19,9 @@
     "discord-api-types": "^0.29.0",
     "discord.js": "^13.6.0",
     "dotenv": "^16.0.0",
+    "firebase": "^9.8.0",
     "firebase-admin": "^9.8.0",
-    "firebase-functions": "^3.14.1",
+    "firebase-functions": "^3.21.0",
     "node": "^17.7.1",
     "tslint": "^6.1.3"
   },
