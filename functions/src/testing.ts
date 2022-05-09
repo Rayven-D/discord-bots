@@ -26,7 +26,6 @@ const client = new Client({
 const app = initializeApp(firebaseConfig)
 const db = getFirestore(app);
 
-client.login('OTU1MzA4NDE0NjYwMTIwNTg2.YjfySg.OnBvh42Egeahzsyx5eJrp6V_OcQ')
 
 client.on('ready', async () => {
     const channel = client.channels.cache.get("943314950678515833") as TextChannel
