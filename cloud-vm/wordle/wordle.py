@@ -131,5 +131,42 @@ async def on_command_error(ctx, error):
     response = failed + streaks + stats + help
     await ctx.send('>>> {}'.format(response))
 
+@bot.event
+async def on_message(message):
+    wordle_regex = re.compile(r"Wordle [0-9]+ [1-6X]/6")
+    if(wordle_regex.search(message.content)):
+        doc_ref = db.collection(u'Users').document(f'{message.author.id}')
+        temp_ref = doc_ref.get()
+        if(temp_ref.exists):
+            doc = temp_ref.to_dict()
+            tries = doc.get('tries')
+            tries_index = message.content.find('/') - 1
+            num_tries = message.content[tries_index]
+            index = 6
+            if(num_tries.isnumeric()):
+                index = int(num_tries) - 1
+            tries[index] += 1
+            doc_ref.update({
+                u'tries': tries
+            })
+            await message.channel.send(f'Thanks {doc.get("username")}! I have recoreded your entry for today.')
+        else:
+            tries = [0,0,0,0,0,0,0]
+            tries_index = message.content.find('/') - 1
+            num_tries = message.content[tries_index]
+            index = 6
+
+            if(num_tries.isnumeric()):
+                index = int(num_tries) - 1
+            tries[index] += 1
+            data = {
+                u'id': message.author.id,
+                u'tries': tries,
+                u'username': message.author.ursername
+            }
+            doc_ref.set(data)
+            await message.channel.send(f'Thanks {doc.get("username")}, and welcome to the Daily Wordle! I will keep track of all of your tries and guesses.')
+    await bot.process_commands(message=message)
+
 
 bot.run(TOKEN)
