@@ -7,6 +7,9 @@ import os
 import re
 from quickchart import QuickChart
 from dotenv import load_dotenv
+import http.client
+import json
+import urllib.parse
 
 
 
@@ -112,24 +115,51 @@ async def get_streak(ctx, arg):
     response = f'{doc.get("username")} has a streak of: `{count}`'
     await ctx.send('> {}'.format(response))
 
+@bot.command(name='8ball')
+async def magic_8_ball(ctx, *arg):
+    question = " ".join(arg)
+    conn = http.client.HTTPSConnection("8ball.delegator.com")
+    question_param = urllib.parse.quote(question)
+    conn.request('GET', '/magic/JSON/' + question_param)
+    response = conn.getresponse()
+    response_object = json.loads(response.read())
+    type = response_object.get('magic').get('type')
+    color = discord.Colour.light_grey().__hash__()
+    if(type == 'Contrary'):
+        color = discord.Colour.red().__hash__()
+    elif(type == 'Affirmative'):
+        color = discord.Colour.green().__hash__()
+    embed = discord.Embed(
+        title= response_object.get('magic').get('answer'),
+        description='Magic 8 ball knows all',
+        color=color
+    )
+    embed.set_author(name=response_object.get('magic').get('question'))
+    await ctx.send(embed=embed)
+
+
 @bot.command(name="help")
 async def wordle_bot_help(ctx):
     header = '**Help is on the way!** \n__Here are some commands for me:__\n'
     streaks = '`!getmystreak` -> get your current Wordle streak\n`!getstreak @<user>` -> get Wordle streak of tagged user\n'
     stats = '`!getmystats` -> get your current Wordle stats\n`!getstats @<user>` -> get Wordle stats of tagged user\n'
+    ball8 = '`!8ball <question>` -> ask the all knowing 8 ball\n'
     help = '`!help` -> pull up help menu for all commands available\n'
 
-    response = header + streaks + stats + help
+    response = header + streaks + stats + ball8 + help
     await ctx.send('>>> {}'.format(response))
 @bot.event
 async def on_command_error(ctx, error):
     failed = '**Not a known command...**\n__Here are some commands for me:__\n'
     streaks = '`!getmystreak` -> get your current Wordle streak\n`!getstreak @<user>` -> get Wordle streak of tagged user\n'
     stats = '`!getmystats` -> get your current Wordle stats\n`!getstats @<user>` -> get Wordle stats of tagged user\n'
+    ball8 = '`!8ball <question>` -> ask the all knowing 8 ball\n'
     help = '`!help` -> pull up help menu for all commands available\n'
 
-    response = failed + streaks + stats + help
+    response = failed + streaks + stats + ball8 + help
     await ctx.send('>>> {}'.format(response))
+
+
 
 @bot.event
 async def on_message(message):
