@@ -3,6 +3,8 @@ from firebase_admin import credentials
 from firebase_admin import firestore
 import discord
 from discord.ext import commands
+from discord_slash import SlashCommand, SlashContext
+from discord_slash.utils.manage_commands import create_choice, create_option
 import os
 import re
 from quickchart import QuickChart
@@ -23,11 +25,25 @@ db = firestore.client()
 
 bot = commands.Bot(command_prefix='!')
 bot.remove_command('help')
+slash = SlashCommand(bot, sync_commands=True)
 
+guild_ids = [955312528123113482,928141122943987753]
 
-@bot.command(name='getstats')
-async def get_wordle_stats(ctx, arg):
-    user_id = re.sub(r'[^0-9]','', arg)
+@slash.slash(
+    name='getuserstats',
+    description='Get a user\'s Wordle stats',
+    guild_ids=guild_ids,
+    options=[
+        create_option(
+            name='users',
+            description='Choose a user',
+            required=True,
+            option_type=6
+        )
+    ]
+)
+async def get_wordle_stats(ctx: SlashContext, users):
+    user_id = users.id
     doc_ref = db.collection(u'Users').document(f'{user_id}').get()
     doc = doc_ref.to_dict()
     qc = QuickChart()
@@ -58,7 +74,11 @@ async def get_wordle_stats(ctx, arg):
     embed.set_image(url=qc.get_url())
     await ctx.send(embed=embed)
 
-@bot.command(name='getmystats')
+@slash.slash(
+    name='getmystats',
+    description='Get your Wordle stats',
+    guild_ids=guild_ids,
+)
 async def get_my_wordle_stats(ctx):
     user_id = ctx.author.id
     doc_ref = db.collection(u'Users').document(f'{user_id}').get()
@@ -91,7 +111,11 @@ async def get_my_wordle_stats(ctx):
     embed.set_image(url=qc.get_url())
     await ctx.send(embed=embed)
 
-@bot.command(name='getmystreak')
+@slash.slash(
+    name='getmycount',
+    description='Get the number of Wordles you have completed',
+    guild_ids=guild_ids,
+)
 async def get_my_streak(ctx):
     user_id = ctx.author.id
     doc_ref = db.collection(u'Users').document(f'{user_id}').get()
@@ -103,9 +127,21 @@ async def get_my_streak(ctx):
     response = f'You have a streak of: `{count}`'
     await ctx.send('> {}'.format(response))
 
-@bot.command(name='getstreak')
-async def get_streak(ctx, arg):
-    user_id = re.sub(r'[^0-9]','', arg)
+@slash.slash(
+    name='getusercount',
+    description='Get the number of Wordles a user has completed',
+    guild_ids=guild_ids,
+    options=[
+        create_option(
+            name='users',
+            description='Choose a user',
+            required=True,
+            option_type=6
+        )
+    ]
+)
+async def get_streak(ctx, users):
+    user_id = users.id
     doc_ref = db.collection(u'Users').document(f'{user_id}').get()
     doc = doc_ref.to_dict()
     tries = doc.get('tries')
@@ -115,9 +151,20 @@ async def get_streak(ctx, arg):
     response = f'{doc.get("username")} has a streak of: `{count}`'
     await ctx.send('> {}'.format(response))
 
-@bot.command(name='8ball')
-async def magic_8_ball(ctx, *arg):
-    question = " ".join(arg)
+@slash.slash(
+    name='8ball',
+    description='Ask the all knowing 8 ball a question',
+    guild_ids=guild_ids,
+    options=[
+        create_option(
+            name='question',
+            description='Give the 8 ball a yes/no question (no slashes plz)',
+            required=True,
+            option_type=3
+        )
+    ]
+)
+async def magic_8_ball(ctx, question):
     conn = http.client.HTTPSConnection("8ball.delegator.com")
     question_param = urllib.parse.quote(question)
     conn.request('GET', '/magic/JSON/' + question_param)
@@ -138,29 +185,6 @@ async def magic_8_ball(ctx, *arg):
     await ctx.send(embed=embed)
 
 
-@bot.command(name="help")
-async def wordle_bot_help(ctx):
-    header = '**Help is on the way!** \n__Here are some commands for me:__\n'
-    streaks = '`!getmystreak` -> get your current Wordle streak\n`!getstreak @<user>` -> get Wordle streak of tagged user\n'
-    stats = '`!getmystats` -> get your current Wordle stats\n`!getstats @<user>` -> get Wordle stats of tagged user\n'
-    ball8 = '`!8ball <question>` -> ask the all knowing 8 ball\n'
-    help = '`!help` -> pull up help menu for all commands available\n'
-
-    response = header + streaks + stats + ball8 + help
-    await ctx.send('>>> {}'.format(response))
-@bot.event
-async def on_command_error(ctx, error):
-    failed = '**Not a known command...**\n__Here are some commands for me:__\n'
-    streaks = '`!getmystreak` -> get your current Wordle streak\n`!getstreak @<user>` -> get Wordle streak of tagged user\n'
-    stats = '`!getmystats` -> get your current Wordle stats\n`!getstats @<user>` -> get Wordle stats of tagged user\n'
-    ball8 = '`!8ball <question>` -> ask the all knowing 8 ball\n'
-    help = '`!help` -> pull up help menu for all commands available\n'
-
-    response = failed + streaks + stats + ball8 + help
-    await ctx.send('>>> {}'.format(response))
-
-
-
 @bot.event
 async def on_message(message):
     wordle_regex = re.compile(r"Wordle [0-9]+ [1-6X]/6")
@@ -179,7 +203,7 @@ async def on_message(message):
             doc_ref.update({
                 u'tries': tries
             })
-            await message.channel.send(f'Thanks {doc.get("username")}! I have recoreded your entry for today.')
+            await message.channel.send(f'Thanks {doc.get("username")}! uWu <3. It is saved!')
         else:
             tries = [0,0,0,0,0,0,0]
             tries_index = message.content.find('/') - 1
