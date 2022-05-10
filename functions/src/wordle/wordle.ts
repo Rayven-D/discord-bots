@@ -1,7 +1,7 @@
-import { Client, Message, MessageEmbed, TextChannel } from "discord.js";
+import { Client, Message, TextChannel } from "discord.js";
 import { initializeApp } from "firebase/app";
 import * as functions from 'firebase-functions';
-import { collection, doc, getDoc, getDocs, getFirestore, query, setDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, getFirestore,  setDoc, updateDoc } from "firebase/firestore";
 import { LastCallMessage, UserStats } from "../models/wordle-models";
 
 const firebaseConfig = functions.config();
@@ -76,7 +76,7 @@ export const sendWordleWarriors = functions.pubsub.schedule('0 0 * * *').timeZon
                     tries: user.tries
                 })
             }else{
-                let numTries = msg.content.split(' ')[2].split('/')[0];
+                let numTries = msg.content.split(' ').find(str => str.includes('/'))!.charAt(0)
     
                 let user: UserStats = {
                     id: msg.author.id,
@@ -95,58 +95,6 @@ export const sendWordleWarriors = functions.pubsub.schedule('0 0 * * *').timeZon
                 user.tries[index]++;
                 await setDoc(docRef, user);
             }
-        }
-
-        
-
-        let col = collection(db, 'Users');
-        let q = query(col)
-
-        let qSnap = await getDocs(q);
-        if(!qSnap.empty){
-            const users: UserStats[] =[]
-            qSnap.forEach( snap =>{ 
-                users.push(snap.data() as UserStats)
-            })
-            
-
-            users.forEach(user =>{
-                const chart = {
-                    type: 'horizontalBar',
-                    data:{
-                        labels:['1', '2', '3', '4','5','6','X'],
-                        datasets:[{
-                            label: 'Tries',
-                            data: user.tries
-                        }]
-                    },
-                    options:{
-                        plugins: {
-                            datalabels: {
-                            anchor: 'center',
-                            align: 'center',
-                            color: '#FFF',
-                            font: {
-                                weight: 'normal',
-                            },
-                            },
-                        }
-                    }
-                }
-
-                const encodedChart = encodeURIComponent(JSON.stringify(chart))
-                const chartURL = `https://quickchart.io/chart?c=${encodedChart}&bkg=white`;
-
-    
-
-                const embed = new MessageEmbed();
-                embed.setTitle(`${user.username} Wordle Stats`);
-                embed.setDescription('')
-                embed.setImage(chartURL)
-                embed.setColor('GREEN')
-
-                channel.send({embeds: [embed]})
-            })
         }
     });
 })

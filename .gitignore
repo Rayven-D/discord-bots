@@ -64,3 +64,6 @@ node_modules/
 
 # dotenv environment variables file
 .env
+
+#firebase app
+/cloud-vm/wordle/*.json
