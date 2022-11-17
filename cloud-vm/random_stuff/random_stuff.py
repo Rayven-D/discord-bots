@@ -16,7 +16,6 @@ load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 guild_ids = [955312528123113482, 1026665499309908009]
 guild_objects = [discord.Object(x) for x in guild_ids]
-print(guild_objects)
 
 class random_stuff(discord.Client):
     def __init__(self):
