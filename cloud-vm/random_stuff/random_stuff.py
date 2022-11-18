@@ -10,12 +10,36 @@ import pytz
 import http.client
 import urllib.parse
 import json
+import firebase_admin
+from firebase_admin import credentials
+from firebase_admin import firestore
 
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
-guild_ids = [955312528123113482, 1026665499309908009]
-guild_objects = [discord.Object(x) for x in guild_ids]
+
+cred = credentials.Certificate({
+    "type": os.getenv("FIREBASE_TYPE"),
+    "project_id": os.getenv('FIREBASE_PROJECT_ID'),
+    "private_key_id": os.getenv('FIREBASE_PRIVATE_KEY_ID'),
+    "private_key": os.getenv('FIREBASE_PRIVATE_KEY'),
+    "client_email": os.getenv('FIREBASE_CLIENT_EMAIL'),
+    "client_id": os.getenv("FIREBASE_CLIENT_ID"),
+    "auth_uri": os.getenv("FIREBASE_AUTH_URI"),
+    "token_uri": os.getenv("FIREBASE_TOKEN_URI"),
+    "auth_provider_x509_cert_url": os.getenv("FIREBASE_AUTH_PROVIDER_CERT_URL"),
+    "client_x509_cert_url": os.getenv("FIREBASE_CERT_URL")
+})
+
+firebase_admin.initialize_app(cred)
+
+db = firestore.client()
+
+guild_objects = []
+collections = db.collection(u'Random_Stuff').document(u'Guilds').collections()
+for x in collections:
+    guild_objects.append(discord.Object(x.id))
+
 
 class random_stuff(discord.Client):
     def __init__(self):
@@ -29,6 +53,20 @@ class random_stuff(discord.Client):
                 await tree.sync(guild=x)
             self.synced = True
         print(f'Logged in as {self.user}')
+
+    async def on_guild_join(self, guild):
+        doc_ref = db.collection(u'Random_Stuff').document(u'Guilds')
+        temp_ref = doc_ref.get()
+        if(temp_ref.exists):
+            doc_ref.collection(f'{guild.id}').document(u'Guild_Info').set({
+                'name': guild.name
+            })
+    async def on_guild_remove(self, guild):
+        col_ref = db.collection(u'Random_Stuff').document(u'Guilds').collection(f'{guild.id}')
+        docs = col_ref.list_documents()
+        for doc in docs:
+            doc.delete()
+
 
 client = random_stuff()
 tree = app_commands.CommandTree(client)
@@ -51,6 +89,7 @@ async def time_to_tswizzle(interaction: discord.Interaction):
     guilds=guild_objects
 )
 async def magic_8_ball(interaction: discord.Interaction, question: str):
+    print('testing')
     conn = http.client.HTTPSConnection("8ball.delegator.com")
     question_param = urllib.parse.quote(question)
     conn.request('GET', '/magic/JSON/' + question_param)
