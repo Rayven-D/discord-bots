@@ -1,0 +1,9 @@
+version: "4.17"
+services:
+  random_stuff:
+    container_name: "random_stuff"
+    build:
+      context: .
+      dockerfile: ./random_stuff/dockerfile
+    env_file: ./random_stuff/.env
+    entrypoint: ["python3", "-u", "random_stuff.py"]

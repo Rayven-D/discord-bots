@@ -1,0 +1,7 @@
+FROM python:3
+
+WORKDIR /usr/src/bot/random_stuff
+
+COPY ./random_stuff .
+
+RUN pip install --no-cache -r requirements.txt
