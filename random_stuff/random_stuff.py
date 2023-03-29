@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 from discord import app_commands
 import os
-from typing import Tuple
+from typing import List
 from dotenv import load_dotenv
 import firebase_admin
 from firebase_admin import credentials
@@ -32,9 +32,12 @@ firebase_admin.initialize_app(cred)
 db = firestore.client()
 
 guild_objects = []
+personal_guilds = []
 collections = db.collection(u'Random_Stuff').document(u'Guilds').collections()
 for x in collections:
     guild_objects.append(discord.Object(x.id))
+    if(x.id == "1026665499309908009" or x.id == "955312528123113482"):
+        personal_guilds.append(discord.Object(x.id))
 
 
 class random_stuff(discord.Client):
@@ -50,18 +53,6 @@ class random_stuff(discord.Client):
                 await tree.sync(guild=x)
             self.synced = True
         print(f'Logged in as {self.user}')
-        
-        # users = ["Rayven", "Jessi", "Owen","Alyssa"]
-        # user_ids = [290294208634290179, 963157243786825768, 494265123217735686, 399372400279683096]
-        # user_obj = [(await self.fetch_user(x)) for x in user_ids]
-        # print(user_obj)
-        # selection = random.sample(range(4), 4)
-        # while(selection[0] == 0 or selection[1] == 1 or selection[2] == 2 or selection[3] == 3):
-        #     print("Someone got themselves. Retrying...")
-        #     selection = random.sample(range(4), 4)
-        # print('Everyone got someone different!')
-        # for x in range(4):
-        #     await user_obj[x].send(f"It's time to reroll due to some circumstances.\nThe above rules still apply.\nHere's your new person: ***{users[selection[x]]}***")
 
     async def on_guild_join(self, guild):
         doc_ref = db.collection(u'Random_Stuff').document(u'Guilds')
@@ -85,7 +76,7 @@ tree = app_commands.CommandTree(client)
 @tree.command(
     name="timetotswizzle", 
     description="How much longer until we see the Goddess herself", 
-    guilds=guild_objects[0:2]
+    guilds=personal_guilds
 
 )
 async def time_to_tswizzle(interaction: discord.Interaction):
@@ -98,8 +89,16 @@ async def time_to_tswizzle(interaction: discord.Interaction):
     description="Randomize people in server into equal (enough) teams",
     guilds= guild_objects
 )
-async def createteams(interaction: discord.Interaction, number_of_teams: int, in_call: discord.VoiceChannel = None):
-    await randomizer_ext.createteams(interaction, number_of_teams, in_call)
+async def create_teams(interaction: discord.Interaction, number_of_teams: int, rename_teams: bool = None, in_call: discord.VoiceChannel = None):
+    await randomizer_ext.create_teams(interaction, number_of_teams, rename_teams, in_call)
+
+@tree.command(
+    name="renameteams",
+    description="Team captain privilages! Rename your team :)",
+    guilds=guild_objects
+)
+async def rename_teams(interaction: discord.Interaction):
+    await randomizer_ext.rename_teams(interaction)
 
 
 client.run(TOKEN)
