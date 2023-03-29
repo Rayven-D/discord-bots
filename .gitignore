@@ -64,5 +64,6 @@ node_modules/
 
 # dotenv environment variables file
 .env
-cloud-vm/random_stuff/discord-bot-server-278c3-firebase-adminsdk-fa00v-1dba7adb1f.json
-cloud-vm/wordle/wordle-bot-discord-firebase-adminsdk-pcdbv-c5915e6837.json
+
+wordle/wordle-bot-discord-firebase-adminsdk-pcdbv-c5915e6837.json
+random_stuff/discord-bot-server-278c3-firebase-adminsdk-fa00v-1dba7adb1f.json
