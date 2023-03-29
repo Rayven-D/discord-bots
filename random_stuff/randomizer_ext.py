@@ -3,7 +3,7 @@ from discord.ext import commands
 from discord import app_commands
 import random
 
-async def randomize_teams(interaction: discord.Interaction, teams: int, in_call: discord.VoiceChannel = None):
+async def createteams(interaction: discord.Interaction, teams: int, in_call: discord.VoiceChannel = None):
     guild = interaction.guild
     member_list = []
     if in_call != None:
@@ -17,7 +17,6 @@ async def randomize_teams(interaction: discord.Interaction, teams: int, in_call:
     if(teams > len(member_list)):
         await interaction.channel.send(f"You have more teams than the number of people.")
     else:
-    
         random.shuffle(member_list)
         sorted_teams = []
         for index, x in enumerate(member_list):
@@ -25,12 +24,19 @@ async def randomize_teams(interaction: discord.Interaction, teams: int, in_call:
                 sorted_teams.append([x])
             else:
                 sorted_teams[index % teams].append(x)
-        message = ""
+        embed = discord.Embed(
+            title="Here are your teams!",
+            color= discord.Colour.dark_green().__hash__()
+        )
         for x in range(teams):
             row = sorted_teams[x]
-            message += f'Team {x + 1}:\n'
+            team_list = ""
             for y in row:
-                message += f'• {y.name}\n'
-            message += "\n"
-        await interaction.channel.send(message)
+                team_list += f'• {y.name}\n'
+            embed.add_field(
+                name=f"Team {x + 1}", # add <#{ voice chat id}> if you want to specify a voice channel
+                value=team_list,
+                inline=False
+            )
+        await interaction.channel.send(embed=embed)
 

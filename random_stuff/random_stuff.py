@@ -80,6 +80,7 @@ class random_stuff(discord.Client):
 client = random_stuff()
 tree = app_commands.CommandTree(client)
 
+#------------------------------ Personal Stuff -------------------------------
 
 @tree.command(
     name="timetotswizzle", 
@@ -90,13 +91,15 @@ tree = app_commands.CommandTree(client)
 async def time_to_tswizzle(interaction: discord.Interaction):
     await personal_ext.time_to_tswizzle(interaction)
 
+#------------------------------- Randomizer Ext -------------------------------
+
 @tree.command(
-    name="randomize_teams",
+    name="createteams",
     description="Randomize people in server into equal (enough) teams",
     guilds= guild_objects
 )
-async def randomize_teams(interaction: discord.Interaction, number_of_teams: int, in_call: discord.VoiceChannel = None):
-    await randomizer_ext.randomize_teams(interaction, number_of_teams, in_call)
+async def createteams(interaction: discord.Interaction, number_of_teams: int, in_call: discord.VoiceChannel = None):
+    await randomizer_ext.createteams(interaction, number_of_teams, in_call)
 
 
 client.run(TOKEN)
