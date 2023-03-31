@@ -9,6 +9,7 @@ from firebase_admin import credentials
 from firebase_admin import firestore
 import personal_ext
 import randomizer_ext
+import google_sheets
 
 
 load_dotenv()
@@ -99,6 +100,24 @@ async def create_teams(interaction: discord.Interaction, number_of_teams: int, r
 )
 async def rename_teams(interaction: discord.Interaction):
     await randomizer_ext.rename_teams(interaction)
+
+@tree.command(
+    name="customgameselect",
+    description="Get custom rulesets!",
+    guilds=guild_objects
+)
+@app_commands.choices(gametype=[
+    app_commands.Choice(name="Valorant", value="valo")
+])
+@app_commands.describe(
+    repeat="Repeat gamemodes, meaning you can get the same gamemode multiple times possibly.",
+    refresh="Refresh list of game modes removed from no repeating. If repeat is turned on, this is not needed."
+)
+async def valo_custom_game_selection(interaction: discord.Integration, gametype: app_commands.Choice[str], repeat: bool = False, refresh: bool = False):
+    if gametype.value == "valo":
+        await google_sheets.valo_custom_game_selection(interaction, repeat, refresh)
+
+
 
 
 client.run(TOKEN)

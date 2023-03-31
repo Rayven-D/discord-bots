@@ -54,8 +54,16 @@ async def create_teams(interaction: discord.Interaction, teams: int, rename_team
                 inline=False
             )
         last_embed = embed
-        print(last_embed)
-        last_message = await interaction.response.send_message(embed=embed)
+        await interaction.response.send_message(embed=embed)
+        captain_string = ""
+        for index, x in enumerate(team_captains):
+            if index + 1 == len(team_captains):
+                captain_string += " and "
+            captain_string += f"<@{x}>"
+            if index + 1 < len(team_captains):
+                captain_string += ","
+            
+        await interaction.channel.send(f"Teams have been set! Team captains {captain_string}, please use `/renameteams` to rename your team.")
     
 async def rename_teams(interaction: discord.Interaction):
     if not (interaction.user.id in team_captains.keys()):
@@ -63,14 +71,14 @@ async def rename_teams(interaction: discord.Interaction):
         return
     rename_teams_modal = RenameTeamsModal()
     rename_teams_modal.last_embed = last_embed
-    print(last_embed)
     await interaction.response.send_modal(rename_teams_modal)
 
 class RenameTeamsModal(discord.ui.Modal):
     last_embed: discord.Embed = None
+    global team_captains
     def __init__(self):
         super().__init__(title="New Team Name")
-        self.add_item(discord.ui.TextInput(label="new Team Name:"))
+        self.add_item(discord.ui.TextInput(label="New Team Name (you can only do this once!)"))
 
     async def on_submit(self, interaction: discord.Interaction):
         await interaction.response.send_message("Thanks! Waiting for other responses, then I'll post!", ephemeral=True)
@@ -85,7 +93,7 @@ class RenameTeamsModal(discord.ui.Modal):
             value= values,
             inline= False
         )
-        print(self.last_embed.fields[list(team_captains.keys()).index(interaction.user.id)].name)
+
         team_captains.pop(interaction.user.id)
 
         if len(team_captains) == 0:
