@@ -3,5 +3,5 @@ python-dotenv
 pytz
 firebase_admin
 google-api-python-client 
-oogle-auth-httplib2 
+google-auth-httplib2 
 google-auth-oauthlib
