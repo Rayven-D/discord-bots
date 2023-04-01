@@ -7,9 +7,10 @@ from dotenv import load_dotenv
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
-import personal_ext
-import randomizer_ext
-import google_sheets
+import helper_functions.google_sheets as google_sheets
+import helper_functions.personal_ext as personal_ext
+import helper_functions.randomizer_ext as randomizer_ext
+
 
 
 load_dotenv()
