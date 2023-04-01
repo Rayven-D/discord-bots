@@ -6,4 +6,4 @@ services:
       context: .
       dockerfile: ./random_stuff/dockerfile
     env_file: ./random_stuff/.env
-    entrypoint: ["python3", "-u", "random_stuff.py"]
+    entrypoint: ["python3", "-u", "main.py"]
