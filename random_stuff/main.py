@@ -9,7 +9,7 @@ from firebase_admin import credentials
 from firebase_admin import firestore
 import helper_functions.google_sheets as google_sheets
 import helper_functions.personal_ext as personal_ext
-import helper_functions.randomizer_ext as randomizer_ext
+import helper_functions.team_makers as team_makers
 
 
 
@@ -92,7 +92,7 @@ async def time_to_tswizzle(interaction: discord.Interaction):
     guilds= guild_objects
 )
 async def create_teams(interaction: discord.Interaction, number_of_teams: int, rename_teams: bool = None, in_call: discord.VoiceChannel = None):
-    await randomizer_ext.create_teams(interaction, number_of_teams, rename_teams, in_call)
+    await team_makers.create_teams(interaction, number_of_teams, rename_teams, in_call)
 
 @tree.command(
     name="renameteams",
@@ -100,7 +100,7 @@ async def create_teams(interaction: discord.Interaction, number_of_teams: int, r
     guilds=guild_objects
 )
 async def rename_teams(interaction: discord.Interaction):
-    await randomizer_ext.rename_teams(interaction)
+    await team_makers.rename_teams(interaction)
 
 @tree.command(
     name="customgameselect",

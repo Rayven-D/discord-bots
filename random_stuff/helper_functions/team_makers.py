@@ -99,4 +99,6 @@ class RenameTeamsModal(discord.ui.Modal):
         if len(team_captains) == 0:
             await interaction.channel.send(embed=self.last_embed)
 
+            
+
 
